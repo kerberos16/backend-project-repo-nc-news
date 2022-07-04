@@ -11,6 +11,13 @@ exports.fetchArticlesById = (article_id) => {
             });
           } else return article.rows[0];
     })
-
-
 }
+
+ exports.updateArticle = (article_id, inc_votes) => {
+    if (!inc_votes)
+      return Promise.reject({ status: 400, msg: "Bad request: Missing input." });
+    return connection
+    .query('UPDATE articles SET votes = $1 WHERE article_id =$2 RETURNING*', [inc_votes,article_id]).then(({rows}) =>{
+        return rows[0]
+    })
+  };
