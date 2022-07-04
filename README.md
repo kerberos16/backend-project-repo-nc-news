@@ -1,57 +1,41 @@
-# Northcoders News API
+Hello reader!
 
-## Background
+NC News is a web application which is designed to function as a repository for news articles. It will retrieve, add, update and delete information from a database when requests are made. The user will be able to access information about articles, comments, topics and users.
 
-We will be building an API for the purpose of accessing application data programmatically. The intention here is to mimic the building of a real world backend service (such as reddit) which should provide this information to the front end architecture.
+Getting Started
 
-Your database will be PSQL, and you will interact with it using [node-postgres](https://node-postgres.com/).
+1. Please clone this repository from *insert url at a later point*
 
-## Kanban
+2. cd into the repository
+cd backend-project-repo-nc-news
 
-### Link to your Trello Board here: https://trello.com/b/7yiHe1nI
+3. Install dependencies
 
-To keep track of the tasks involved in this project we're going to use a kanban board. Ensure that you work on one _ticket_ at time. You can click on the ticket to find out more information about what is required for the feature. A ticket is not considered complete unless both the happy path and errors response are handled. You can make use of the checklist on each ticket to keep track of the errors you want to handle. You can also make use of [error-handling.md](error-handling.md) to consider the error codes we may wish to respond with.
+npm install jest -D
 
-**Please ensure you work through the tickets in numerical order.**
+npm install supertest
 
-## Git Branching and Pull Requests
+npm install express
 
-You will be working on each ticket on a new **branch**.
+npm install pg
 
-To create and switch to a new git branch use the command:
+npm install nodemon
 
-```
-git checkout -b <new branch name>
-```
+npm install dotenv
 
-This will create a branch and move over to that branch. (Omit the `-b` flag if you wish to switch to an already existing branch).
+4. After you have installed the dotenv package you would need to create two files to set up the development environment. It is essential that these files be in the root directory of the repository.
+The files to be create are:
 
-We recommend that you name the branch after the number assigned to each ticket via the header. eg. `ncnews-1`
+.env.development
+.env.test
 
-When pushing the branch to git hub ensure that you make reference to the branch you are pushing to on the remote.
+Please also add the following contents to each files respectively:
 
-```
-git push origin <branch name>
-```
+PGDATABASE=nc_news
+PGDATABASE=nc_news_test
 
-From github you can make a pull request and share the link and ticket number via a pull request specific nchelp using the command `nchelp pr`. A tutor will swing by to review your code. Ensure that you keep your trello up to date whilst you await the PR approval. Regular `nchelp` will be available for when you need support.
+5. Run the "setup-dbs" script
+npm run setup-dbs
 
-Once a pull request been accepted be sure to switch back to the main branch and pull down the updated changes.
-
-```
-git checkout main
-
-git pull origin main
-```
-
-You can tidy up your local branches once they have been pull into main by deleting them:
-
-```
-git branch -D <local branch>
-```
-
-## Husky
-
-To ensure we are not commiting broken code this project makes use of git hooks. Git hooks are scripts triggered during certain events in the git lifecycle. Husky is a popular package which allows us to set up and maintain these scripts. This project makes use a _pre-commit hook_. When we attempt to commit our work, the script defined in the `pre-commit` file will run. If any of our tests fail than the commit will be aborted.
-
-The [Husky documentation](https://typicode.github.io/husky/#/) explains how to configure Husky for your own project as well as creating your own custom hooks.\_
+6. Run the seed script
+npm run seed
