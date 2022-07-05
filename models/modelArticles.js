@@ -63,3 +63,17 @@ exports.fetchArticlesById = (article_id) => {
         return articles
       })
   }
+
+  exports.fetchComments = (article_id) => {
+    return connection
+    .query(
+      `SELECT *
+      FROM comments
+      WHERE comments.article_id = $1 `, [article_id])
+    .then((comment) => { 
+      if (comment.rows.length === 0) {
+      return Promise.reject({ status: 404, msg: "Article Id does not exist." })
+    }
+    return comment.rows;
+    })
+  }

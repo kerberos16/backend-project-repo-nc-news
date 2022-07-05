@@ -176,7 +176,7 @@ describe("app", () => {
         });
     });
 })
-  describe.only("8. GET api/articles", () => {
+  describe("8. GET api/articles", () => {
     test("status:200, responds with all articles sorted by date in descending order containing author, article_id, topic, created_at, votes and comment_count property", () => {
       return request(app)
       .get('/api/articles')
@@ -201,4 +201,33 @@ describe("app", () => {
     })
   })
 
-})
+  describe("9. GET /api/articles/:article_id/comments", () => {
+    test("status: 200, responds with all comments for a given article", () => {
+      return request(app)
+      .get("/api/articles/9/comments")
+      .expect(200)
+      .then(({body}) => {
+        console.log(body)
+        expect(body).toBeInstanceOf(Array);
+        expect(body).toHaveLength(2)
+        body.forEach((comment) => {
+          expect(comment).toMatchObject({
+            comment_id:expect.any(Number),
+            votes: expect.any(Number),
+            created_at: expect.any(String),
+            author: expect.any(String),
+            body:expect.any(String)
+          })
+        })
+      })
+    })
+    test('status:404, valid article_id but does not exist in database', () => {
+      return request(app)
+        .get('/api/articles/9999/comments')
+        .expect(404)
+        .then(({body : {msg}}) => {
+          expect(msg).toEqual('Article Id does not exist.')
+        })
+    })
+  });
+  })
