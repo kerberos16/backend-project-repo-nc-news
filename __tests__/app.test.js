@@ -157,7 +157,7 @@ describe("app", () => {
     })
   })
 
-  describe.only("7. GET api/articles/:article_id", () => {
+  describe("7. GET api/articles/:article_id", () => {
     test("status:200, responds with an article object including a comment count property", () => {
       return request(app)
         .get("/api/articles/9")
@@ -176,4 +176,29 @@ describe("app", () => {
         });
     });
 })
+  describe.only("8. GET api/articles", () => {
+    test("status:200, responds with all articles sorted by date in descending order containing author, article_id, topic, created_at, votes and comment_count property", () => {
+      return request(app)
+      .get('/api/articles')
+      .expect(200)
+      .then(({body}) => {
+        expect(body.articles).toBeInstanceOf(Array);
+        expect(body.articles).toHaveLength(12)
+                body.articles.forEach((article) => {
+                    expect(article).toMatchObject(
+                      {
+                        author: expect.any(String),
+                        title: expect.any(String),
+                        topic: expect.any(String),
+                        article_id: expect.any(Number),
+                        created_at: expect.any(String),
+                        votes: expect.any(Number),
+                        comment_count: expect.any(Number)
+                      }
+                    )
+                })
+      })
+    })
+  })
+
 })
