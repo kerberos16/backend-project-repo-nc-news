@@ -136,37 +136,6 @@ describe("app", () => {
 
   });
 
-  //  Will use these tests later for task 17, realized that task 6 only wanted to retrieve all users
-  //  instead of user/user:id
-  //
-  //  describe.only("17. GET /api/users/username", () => {
-  //   test('status:200, responds with an array of user objects', () => {
-  //     return request(app)
-  //     .get('/api/users/icellusedkars')
-  //     .expect(200)
-  //     .then(( {body} ) => {
-  //       expect(body.users).toBeInstanceOf(Array);
-  //       expect(body.users).toHaveLength(3)
-  //       body.users.forEach((user) => {
-  //           expect(user).toMatchObject(
-  //             {
-  //               avatar_url: expect.any(String),
-  //               name: expect.any(String),
-  //               username: expect.any(String)
-  //             }
-  //           )
-  //       })
-  //   })
-  //   })
-  //   test('status:404, username does not exist', () => {
-  //     return request(app)
-  //     .get('/api/users/sizenlyutfi')
-  //     .expect(404)
-  //     .then(({body : {msg}}) => {
-  //       expect(msg).toEqual('User not found')
-  //     })
-  //   })
-  // })
   describe("6. GET /api/users", () => {
     test("200: responds with an array of user objects", () => {
         return request(app)
@@ -186,14 +155,25 @@ describe("app", () => {
             })
         })
     })
-      test("404: Should respond with correct error message for invalid path", () => {
-        return request(app)
-          .get("/api/userZ")
-          .expect(404)
-          .then(({ body : {msg} }) => {
-           expect(msg).toEqual("Invalid Path");
-          });
-      });
-})
+  })
 
+  describe.only("7. GET api/articles/:article_id", () => {
+    test("status:200, responds with an article object including a comment count property", () => {
+      return request(app)
+        .get("/api/articles/9")
+        .expect(200)
+        .then(({body}) => {
+          expect(body.article).toMatchObject({
+            article_id: 9,
+            author:"butter_bridge",
+            title:"They're not exactly dogs, are they?",
+            body:"Well? Think about it.",
+            topic:"mitch",
+            created_at: "2020-06-06T09:10:00.000Z",
+            votes: 0,
+            comment_count: 2
+          })
+        });
+    });
+})
 })
