@@ -42,7 +42,7 @@ describe("app", () => {
           });
     })
 
-    describe("4. GET /api/articles/:article_id", () => {
+    describe.only("4. GET /api/articles/:article_id", () => {
       test("status:200, responds with an article object by Id", () => {
         
         return request(app)
@@ -135,38 +135,6 @@ describe("app", () => {
     })
 
   });
-
-  //  Will use these tests later for task 17, realized that task 6 only wanted to retrieve all users
-  //  instead of user/user:id
-  //
-  //  describe.only("17. GET /api/users/username", () => {
-  //   test('status:200, responds with an array of user objects', () => {
-  //     return request(app)
-  //     .get('/api/users/icellusedkars')
-  //     .expect(200)
-  //     .then(( {body} ) => {
-  //       expect(body.users).toBeInstanceOf(Array);
-  //       expect(body.users).toHaveLength(3)
-  //       body.users.forEach((user) => {
-  //           expect(user).toMatchObject(
-  //             {
-  //               avatar_url: expect.any(String),
-  //               name: expect.any(String),
-  //               username: expect.any(String)
-  //             }
-  //           )
-  //       })
-  //   })
-  //   })
-  //   test('status:404, username does not exist', () => {
-  //     return request(app)
-  //     .get('/api/users/sizenlyutfi')
-  //     .expect(404)
-  //     .then(({body : {msg}}) => {
-  //       expect(msg).toEqual('User not found')
-  //     })
-  //   })
-  // })
   describe("6. GET /api/users", () => {
     test("200: responds with an array of user objects", () => {
         return request(app)
@@ -186,14 +154,6 @@ describe("app", () => {
             })
         })
     })
-      test("404: Should respond with correct error message for invalid path", () => {
-        return request(app)
-          .get("/api/userZ")
-          .expect(404)
-          .then(({ body : {msg} }) => {
-           expect(msg).toEqual("Invalid Path");
-          });
-      });
 })
 
 })
