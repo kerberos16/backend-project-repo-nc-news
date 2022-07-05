@@ -229,5 +229,13 @@ describe("app", () => {
           expect(msg).toEqual('Article Id does not exist.')
         })
     })
+    test("status:404, responds with correct error message for invalid path", () => {
+      return request(app)
+        .get("/api/articles/1/NOTcomments")
+        .expect(404)
+        .then(({ body : {msg} }) => {
+         expect(msg).toEqual("Invalid Path");
+        });
   });
   })
+})
