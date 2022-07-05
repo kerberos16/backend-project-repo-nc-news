@@ -42,7 +42,7 @@ describe("app", () => {
           });
     })
 
-    describe.only("4. GET /api/articles/:article_id", () => {
+    describe("4. GET /api/articles/:article_id", () => {
       test("status:200, responds with an article object by Id", () => {
         
         return request(app)
@@ -135,6 +135,7 @@ describe("app", () => {
     })
 
   });
+
   describe("6. GET /api/users", () => {
     test("200: responds with an array of user objects", () => {
         return request(app)
@@ -154,6 +155,25 @@ describe("app", () => {
             })
         })
     })
-})
+  })
 
+  describe.only("7. GET api/articles/:article_id", () => {
+    test("status:200, responds with an article object including a comment count property", () => {
+      return request(app)
+        .get("/api/articles/9")
+        .expect(200)
+        .then(({body}) => {
+          expect(body.article).toMatchObject({
+            article_id: 9,
+            author:"butter_bridge",
+            title:"They're not exactly dogs, are they?",
+            body:"Well? Think about it.",
+            topic:"mitch",
+            created_at: "2020-06-06T09:10:00.000Z",
+            votes: 0,
+            comment_count: 2
+          })
+        });
+    });
+})
 })
