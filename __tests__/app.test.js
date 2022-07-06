@@ -3,6 +3,8 @@ const seed = require("../db/seeds/seed.js");
 const testData = require("../db/data/test-data/index.js");
 const app = require("../app");
 const db = require("../db/connection.js");
+const jestSorted = require("jest-sorted");
+
 
 beforeEach(() => {
     return seed(testData);
@@ -293,4 +295,24 @@ describe("app", () => {
     });
   });
 
+  describe("11 GET query /api/articles?sort_by=created_at&order=desc", () => {
+    test("status: 400 returns articles sorted by the default criteria of created_at column and descending order", () => {
+      return request(app)
+      .get("/api/articles?sort_by=created_at&order=desc")
+      .expect(200).then(({body}) => {
+        expect(body.articles).toBeSortedBy("created_at", {
+          descending: true
+        })
+      })
+    })
+    test("status: 400 returns articles sorted by the author criteria and ascending order", () => {
+      return request(app)
+      .get("/api/articles?sort_by=author&order=asc")
+      .expect(200).then(({body}) => {
+        expect(body.articles).toBeSortedBy("author", {
+          descending: false
+        })
+      })
+    })
+  })
 })
