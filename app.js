@@ -3,6 +3,7 @@ const express = require("express")
 const { getTopics } = require("./controllers/controllerTopic.js")
 const { getArticlesById, patchArticle, getArticles, getComments} = require("./controllers/controllerArticles.js")
 const { getUsers } = require("./controllers/controllerUsers")
+const { postComment } = require("./controllers/controllerComments")
 
 const {handlePSQLErrors, handleCustomErrors, handleServerErrors} = require("./errors/errorHandlers")
 
@@ -15,6 +16,7 @@ app.patch("/api/articles/:article_id", patchArticle)
 app.get('/api/users', getUsers)
 app.get('/api/articles' , getArticles)
 app.get('/api/articles/:article_id/comments', getComments)
+app.post('/api/articles/:article_id/comments', postComment)
 
 
 app.all("/*", (req,res,next) => {
