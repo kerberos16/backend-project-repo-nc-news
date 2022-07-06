@@ -279,6 +279,18 @@ describe("app", () => {
           expect(msg).toEqual("Bad request: Invalid input parameters");
         });
     });
+    test("status: 400 responds with an error if the username does not exist in the database", () => {
+      return request(app)
+        .post("/api/articles/1/comments")
+        .send({
+          username: "kerberos92",
+          body: "If I were you, I would have spoken to the manager",
+        })
+        .expect(404)
+        .then(({body : {msg}}) => {
+          expect(msg).toEqual("Path not found!");
+        });
+    });
   });
 
 })
