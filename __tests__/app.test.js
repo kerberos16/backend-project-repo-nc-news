@@ -247,4 +247,50 @@ describe("app", () => {
     })
   })
   })
+
+  describe("10 POST /api/articles/:article_id/comments", () => {
+    test("status: 201 responds with a newly posted comment", () => {
+      return request(app)
+        .post("/api/articles/1/comments")
+        .send({
+          username: "icellusedkars",
+          body: "If I were you, I would have spoken to the manager",
+        })
+        .expect(201)
+        .then(({body}) => {
+          expect(body.comment).toMatchObject({
+            comment_id: 19,
+            body: "If I were you, I would have spoken to the manager",
+            article_id: 1,
+            author: "icellusedkars",
+            created_at: expect.any(String)
+          });
+        });
+    });
+    test("status: 400 responds with an error if the input is not in the correct format", () => {
+      return request(app)
+        .post("/api/articles/1/comments")
+        .send({
+          username: "icellusedkars",
+          last_active: "2h 42mins",
+        })
+        .expect(400)
+        .then(({body : {msg}}) => {
+          expect(msg).toEqual("Bad request: Invalid input parameters");
+        });
+    });
+    test("status: 400 responds with an error if the username does not exist in the database", () => {
+      return request(app)
+        .post("/api/articles/1/comments")
+        .send({
+          username: "kerberos92",
+          body: "If I were you, I would have spoken to the manager",
+        })
+        .expect(404)
+        .then(({body : {msg}}) => {
+          expect(msg).toEqual("Path not found!");
+        });
+    });
+  });
+
 })
