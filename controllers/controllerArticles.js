@@ -31,8 +31,8 @@ exports.getArticles = (req, res, next) => {
 
 exports.getComments = (req, res, next) => {
     const {article_id} = req.params
-    fetchComments(article_id).then((comment) => {
-        res.status(200).send(comment)
+    fetchComments(article_id).then((comments) => {
+        res.status(200).send({comments})
     }) .catch((err) => {
         next(err)
     })

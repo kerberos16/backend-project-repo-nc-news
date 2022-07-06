@@ -207,13 +207,13 @@ describe("app", () => {
       .get("/api/articles/9/comments")
       .expect(200)
       .then(({body}) => {
-        console.log(body)
-        expect(body).toBeInstanceOf(Array);
-        expect(body).toHaveLength(2)
-        body.forEach((comment) => {
+        expect(body.comments).toBeInstanceOf(Array);
+        expect(body.comments).toHaveLength(2)
+        body.comments.forEach((comment) => {
           expect(comment).toMatchObject({
             comment_id:expect.any(Number),
             votes: expect.any(Number),
+            article_id: expect.any(Number),
             created_at: expect.any(String),
             author: expect.any(String),
             body:expect.any(String)
@@ -237,5 +237,14 @@ describe("app", () => {
          expect(msg).toEqual("Invalid Path");
         });
   });
+     test("status: 200, responds with an emptry array if article exists, but without any comments", () => {
+      return request(app)
+      .get("/api/articles/2/comments")
+      .expect(200)
+      .then(({body}) => {
+      expect(body.comments).toBeInstanceOf(Array);
+      expect(body.comments).toHaveLength(1)
+    })
+  })
   })
 })
