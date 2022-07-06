@@ -176,7 +176,7 @@ describe("app", () => {
         });
     });
 })
-  describe.only("8. GET api/articles", () => {
+  describe("8. GET api/articles", () => {
     test("status:200, responds with all articles sorted by date in descending order containing author, article_id, topic, created_at, votes and comment_count property", () => {
       return request(app)
       .get('/api/articles')
@@ -201,4 +201,50 @@ describe("app", () => {
     })
   })
 
+  describe("9. GET /api/articles/:article_id/comments", () => {
+    test("status: 200, responds with all comments for a given article", () => {
+      return request(app)
+      .get("/api/articles/9/comments")
+      .expect(200)
+      .then(({body}) => {
+        expect(body.comments).toBeInstanceOf(Array);
+        expect(body.comments).toHaveLength(2)
+        body.comments.forEach((comment) => {
+          expect(comment).toMatchObject({
+            comment_id:expect.any(Number),
+            votes: expect.any(Number),
+            article_id: expect.any(Number),
+            created_at: expect.any(String),
+            author: expect.any(String),
+            body:expect.any(String)
+          })
+        })
+      })
+    })
+    test('status:404, valid article_id but does not exist in database', () => {
+      return request(app)
+        .get('/api/articles/9999/comments')
+        .expect(404)
+        .then(({body : {msg}}) => {
+          expect(msg).toEqual('Article Id does not exist.')
+        })
+    })
+    test("status:404, responds with correct error message for invalid path", () => {
+      return request(app)
+        .get("/api/articles/1/NOTcomments")
+        .expect(404)
+        .then(({ body : {msg} }) => {
+         expect(msg).toEqual("Invalid Path");
+        });
+  });
+     test("status: 200, responds with an emptry array if article exists, but without any comments", () => {
+      return request(app)
+      .get("/api/articles/2/comments")
+      .expect(200)
+      .then(({body}) => {
+      expect(body.comments).toBeInstanceOf(Array);
+      expect(body.comments).toHaveLength(1)
+    })
+  })
+  })
 })

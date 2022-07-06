@@ -1,5 +1,6 @@
 const { rows } = require("pg/lib/defaults");
 const connection = require("../db/connection")
+const {checkArticleExists} = require("./checkIfExists")
 
 exports.fetchArticlesById = (article_id) => {
     return connection
@@ -62,4 +63,18 @@ exports.fetchArticlesById = (article_id) => {
     .query(queryString).then(({rows : articles}) => {
         return articles
       })
+  }
+
+  exports.fetchComments = (article_id) => {
+    return connection
+    .query(
+      `SELECT *
+      FROM comments
+      WHERE comments.article_id = $1 `, [article_id])
+    .then((comment) => { 
+      if (!comment.rows.length) {
+        return checkArticleExists(article_id)
+    }
+    return comment.rows;
+    })
   }

@@ -1,7 +1,7 @@
 const express = require("express")
 
 const { getTopics } = require("./controllers/controllerTopic.js")
-const { getArticlesById, patchArticle, getArticles} = require("./controllers/controllerArticles.js")
+const { getArticlesById, patchArticle, getArticles, getComments} = require("./controllers/controllerArticles.js")
 const { getUsers } = require("./controllers/controllerUsers")
 
 const {handlePSQLErrors, handleCustomErrors, handleServerErrors} = require("./errors/errorHandlers")
@@ -14,6 +14,8 @@ app.get("/api/articles/:article_id", getArticlesById)
 app.patch("/api/articles/:article_id", patchArticle)
 app.get('/api/users', getUsers)
 app.get('/api/articles' , getArticles)
+app.get('/api/articles/:article_id/comments', getComments)
+
 
 app.all("/*", (req,res,next) => {
     res.status(404).send({msg: "Invalid Path"})
