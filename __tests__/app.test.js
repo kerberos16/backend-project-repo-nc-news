@@ -314,5 +314,31 @@ describe("app", () => {
         })
       })
     })
+    test("status: 200 returns with an array of CATS topics only", () => {
+      return request(app)
+      .get("/api/articles?topic=cats")
+      .expect(200).then(({body}) => {
+        expect(body.articles).toHaveLength(1)
+        body.articles.forEach((article) => {
+          expect(article.topic).toEqual("cats")
+        })
+      })
+    })
+    test("status 404: responds with an error when passed an invalid topic", () => {
+      return request(app)
+      .get("/api/articles?topic=linguistics")
+      .expect(404).then(({body : {msg}}) =>{
+        expect(msg).toEqual("Bad Request: Invalid input data.")
+      })
+    })
+    test("status 404: responds with an error when passed an invalid sort by option", () => {
+      return request(app)
+      .get("/api/articles?sort_by=mood")
+      .expect(404).then(({body : {msg}}) =>{
+        expect(msg).toEqual("Bad Request: Invalid input data.")
+      })
+    })
   })
-})
+  })
+  
+

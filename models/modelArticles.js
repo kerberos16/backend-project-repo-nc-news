@@ -35,10 +35,13 @@ exports.fetchArticlesById = (article_id) => {
     })
   };
 
-  exports.fetchArticles = (sort_by = "created_at", order = "desc") => {
+  exports.fetchArticles = (sort_by = "created_at", order = "desc", topic) => {
+
+    const queryValues = []
 
     const validSorting = ["article_id","title","topic","author","body","created_at","votes","comment_count"]
     const validOrder = ["asc", "desc"]
+    const validTopic = ["mitch", "cats", "paper"]
 
     let queryString = `SELECT 
     articles.article_id, 
@@ -50,17 +53,25 @@ exports.fetchArticlesById = (article_id) => {
     COUNT (comment_id)::INT AS comment_count
     FROM articles
     LEFT JOIN comments USING (article_id) 
-    GROUP BY articles.article_id`
+    `
 
     if(!validSorting.includes(sort_by)){
-      return Promise.reject({status: 400, msg: "Bad Request: Invalid input data."})
+      return Promise.reject({status: 404, msg: "Bad Request: Invalid input data."})
     } else if (!validOrder.includes(order)) {
-      return Promise.reject({ status: 400, msg: "Bad Request: Invalid input data." });
-    } else {
-      queryString += ` ORDER BY ${sort_by} ${order}`}
+      return Promise.reject({ status: 404, msg: "Bad Request: Invalid input data." });
+    } 
+
+      if(!topic){
+        queryString += `GROUP BY articles.article_id ORDER BY ${sort_by} ${order}`
+      } else if(!validTopic.includes(topic)){
+        return Promise.reject({status:404, msg: "Bad Request: Invalid input data."})
+      } else {
+        queryString += `WHERE topic = $1 GROUP BY articles.article_id ORDER BY ${sort_by} ${order}`
+        queryValues.push(topic)
+      }
 
     return connection
-    .query(queryString).then(({rows : articles}) => {
+    .query(queryString, queryValues).then(({rows : articles}) => {
         return articles
       })
   }
