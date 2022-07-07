@@ -3,6 +3,9 @@ const seed = require("../db/seeds/seed.js");
 const testData = require("../db/data/test-data/index.js");
 const app = require("../app");
 const db = require("../db/connection.js");
+const jestSorted = require("jest-sorted");
+const json = require("../endpoints.json")
+
 
 beforeEach(() => {
     return seed(testData);
@@ -136,37 +139,6 @@ describe("app", () => {
 
   });
 
-  //  Will use these tests later for task 17, realized that task 6 only wanted to retrieve all users
-  //  instead of user/user:id
-  //
-  //  describe.only("17. GET /api/users/username", () => {
-  //   test('status:200, responds with an array of user objects', () => {
-  //     return request(app)
-  //     .get('/api/users/icellusedkars')
-  //     .expect(200)
-  //     .then(( {body} ) => {
-  //       expect(body.users).toBeInstanceOf(Array);
-  //       expect(body.users).toHaveLength(3)
-  //       body.users.forEach((user) => {
-  //           expect(user).toMatchObject(
-  //             {
-  //               avatar_url: expect.any(String),
-  //               name: expect.any(String),
-  //               username: expect.any(String)
-  //             }
-  //           )
-  //       })
-  //   })
-  //   })
-  //   test('status:404, username does not exist', () => {
-  //     return request(app)
-  //     .get('/api/users/sizenlyutfi')
-  //     .expect(404)
-  //     .then(({body : {msg}}) => {
-  //       expect(msg).toEqual('User not found')
-  //     })
-  //   })
-  // })
   describe("6. GET /api/users", () => {
     test("200: responds with an array of user objects", () => {
         return request(app)
@@ -186,14 +158,252 @@ describe("app", () => {
             })
         })
     })
-      test("404: Should respond with correct error message for invalid path", () => {
+  })
+
+  describe("7. GET api/articles/:article_id", () => {
+    test("status:200, responds with an article object including a comment count property", () => {
+      return request(app)
+        .get("/api/articles/9")
+        .expect(200)
+        .then(({body}) => {
+          expect(body.article).toMatchObject({
+            article_id: 9,
+            author:"butter_bridge",
+            title:"They're not exactly dogs, are they?",
+            body:"Well? Think about it.",
+            topic:"mitch",
+            created_at: "2020-06-06T09:10:00.000Z",
+            votes: 0,
+            comment_count: 2
+          })
+        });
+    });
+})
+  describe("8. GET api/articles", () => {
+    test("status:200, responds with all articles sorted by date in descending order containing author, article_id, topic, created_at, votes and comment_count property", () => {
+      return request(app)
+      .get('/api/articles')
+      .expect(200)
+      .then(({body}) => {
+        expect(body.articles).toBeInstanceOf(Array);
+        expect(body.articles).toHaveLength(12)
+                body.articles.forEach((article) => {
+                    expect(article).toMatchObject(
+                      {
+                        author: expect.any(String),
+                        title: expect.any(String),
+                        topic: expect.any(String),
+                        article_id: expect.any(Number),
+                        created_at: expect.any(String),
+                        votes: expect.any(Number),
+                        comment_count: expect.any(Number)
+                      }
+                    )
+                })
+      })
+    })
+  })
+
+  describe("9. GET /api/articles/:article_id/comments", () => {
+    test("status: 200, responds with all comments for a given article", () => {
+      return request(app)
+      .get("/api/articles/9/comments")
+      .expect(200)
+      .then(({body}) => {
+        expect(body.comments).toBeInstanceOf(Array);
+        expect(body.comments).toHaveLength(2)
+        body.comments.forEach((comment) => {
+          expect(comment).toMatchObject({
+            comment_id:expect.any(Number),
+            votes: expect.any(Number),
+            article_id: expect.any(Number),
+            created_at: expect.any(String),
+            author: expect.any(String),
+            body:expect.any(String)
+          })
+        })
+      })
+    })
+    test('status:404, valid article_id but does not exist in database', () => {
+      return request(app)
+        .get('/api/articles/9999/comments')
+        .expect(404)
+        .then(({body : {msg}}) => {
+          expect(msg).toEqual('Article Id does not exist.')
+        })
+    })
+    test("status:404, responds with correct error message for invalid path", () => {
+      return request(app)
+        .get("/api/articles/1/NOTcomments")
+        .expect(404)
+        .then(({ body : {msg} }) => {
+         expect(msg).toEqual("Invalid Path");
+        });
+  });
+     test("status: 200, responds with an emptry array if article exists, but without any comments", () => {
+      return request(app)
+      .get("/api/articles/2/comments")
+      .expect(200)
+      .then(({body}) => {
+      expect(body.comments).toBeInstanceOf(Array);
+      expect(body.comments).toHaveLength(1)
+    })
+  })
+  })
+
+  describe("10 POST /api/articles/:article_id/comments", () => {
+    test("status: 201 responds with a newly posted comment", () => {
+      return request(app)
+        .post("/api/articles/1/comments")
+        .send({
+          username: "icellusedkars",
+          body: "If I were you, I would have spoken to the manager",
+        })
+        .expect(201)
+        .then(({body}) => {
+          expect(body.comment).toMatchObject({
+            comment_id: 19,
+            body: "If I were you, I would have spoken to the manager",
+            article_id: 1,
+            author: "icellusedkars",
+            created_at: expect.any(String)
+          });
+        });
+    });
+    test("status: 400 responds with an error if the input is not in the correct format", () => {
+      return request(app)
+        .post("/api/articles/1/comments")
+        .send({
+          username: "icellusedkars",
+          last_active: "2h 42mins",
+        })
+        .expect(400)
+        .then(({body : {msg}}) => {
+          expect(msg).toEqual("Bad request: Invalid input parameters");
+        });
+    });
+    test("status: 400 responds with an error if the username does not exist in the database", () => {
+      return request(app)
+        .post("/api/articles/1/comments")
+        .send({
+          username: "kerberos92",
+          body: "If I were you, I would have spoken to the manager",
+        })
+        .expect(404)
+        .then(({body : {msg}}) => {
+          expect(msg).toEqual("Path not found!");
+        });
+    });
+  });
+
+  describe("11 GET query /api/articles?sort_by=created_at&order=desc", () => {
+    test("status: 200 returns articles sorted by the default criteria of created_at column and descending order", () => {
+      return request(app)
+      .get("/api/articles?sort_by=created_at&order=desc")
+      .expect(200).then(({body}) => {
+        expect(body.articles).toBeSortedBy("created_at", {
+          descending: true
+        })
+      })
+    })
+    test("status: 200 returns articles sorted by the author criteria and ascending order", () => {
+      return request(app)
+      .get("/api/articles?sort_by=author&order=asc")
+      .expect(200).then(({body}) => {
+        expect(body.articles).toBeSortedBy("author", {
+          descending: false
+        })
+      })
+    })
+    test("status: 200 returns with an array of CATS topics only", () => {
+      return request(app)
+      .get("/api/articles?topic=cats")
+      .expect(200).then(({body}) => {
+        expect(body.articles).toHaveLength(1)
+        body.articles.forEach((article) => {
+          expect(article.topic).toEqual("cats")
+        })
+      })
+    })
+    test("status: 200 returns with an array of MITCH topics only, sorted by title in ascending order", () => {
+      return request(app)
+      .get("/api/articles?sort_by=title&order=asc&topic=mitch")
+      .expect(200).then(({body}) => {
+        expect(body.articles).toHaveLength(11)
+        expect(body.articles).toBeSortedBy("title", {
+          descending: false
+        })
+        body.articles.forEach((article) => {
+          expect(article.topic).toEqual("mitch")
+        })
+      })
+    })
+    test("status 404: responds with an error when passed an invalid order", () => {
+      return request(app)
+      .get("/api/articles?order=horizontal")
+      .expect(404).then(({body : {msg}}) =>{
+        expect(msg).toEqual("Bad Request: Invalid input data.")
+      })
+    })
+    test("status 404: responds with an error when passed an invalid sort_by", () => {
+      return request(app)
+      .get("/api/articles?sort_by=publisher")
+      .expect(404).then(({body : {msg}}) =>{
+        expect(msg).toEqual("Bad Request: Invalid input data.")
+      })
+    })
+    test("status 404: responds with an error when passed an invalid topic", () => {
+      return request(app)
+      .get("/api/articles?topic=linguistics")
+      .expect(404).then(({body : {msg}}) =>{
+        expect(msg).toEqual("Bad request: Invalid input topic")
+      })
+    })
+    test("status 404: responds with an error when passed an invalid sort by option", () => {
+      return request(app)
+      .get("/api/articles?sort_by=mood")
+      .expect(404).then(({body : {msg}}) =>{
+        expect(msg).toEqual("Bad Request: Invalid input data.")
+      })
+    })
+    })
+    describe("12 DELETE /api/comments/:comment_id", () => {
+      test("status 204: deletes a comment", () => {
         return request(app)
-          .get("/api/userZ")
-          .expect(404)
-          .then(({ body : {msg} }) => {
-           expect(msg).toEqual("Invalid Path");
+          .delete("/api/comments/1")
+          .expect(204)
+          .then(({body }) => {
+            expect(body).toEqual({});
           });
       });
-})
+      test('status 404: responds with an error if endpoint is invalid', () => {
+        return request(app)
+        .delete('/api/comments/thisisnotavalidcomment')
+        .expect(400)
+        .then(({body : {msg}})=> {
+            expect(msg).toEqual('Bad Request!')
+        })
+    });
+    test('status 404: returns an error if comment_id does not exist', () => {
+      return request(app)
+      .delete('/api/comments/239')
+      .expect(404)
+      .then(({body : {msg}})=> {
+          expect(msg).toEqual('Page not found: Comment does not exist')
+      })
+  });
+    });
+    describe.only("13 GET /api", () => {
+      test("status: 200, reposnds with a json object of all available endpoints", () => {
+        return request(app)
+        .get("/api")
+        .expect(200)
+        .then(({body}) => {
+          expect(body.api).toBeInstanceOf(Object)
+          expect(body.api).toEqual(json)
+        })
+      })
+    })
+  })
+  
 
-})

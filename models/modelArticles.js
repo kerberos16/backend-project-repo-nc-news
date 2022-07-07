@@ -1,8 +1,16 @@
+const { rows } = require("pg/lib/defaults");
 const connection = require("../db/connection")
+const {checkArticleExists, checkTopicExists} = require("./checkIfExists")
 
 exports.fetchArticlesById = (article_id) => {
     return connection
-    .query('SELECT * FROM articles WHERE article_id =$1;', [article_id])
+    .query(
+      `SELECT articles.*, 
+      COUNT(comments.comment_id)::INT AS comment_count 
+      FROM articles 
+      LEFT JOIN comments USING (article_id) 
+      WHERE articles.article_id = $1 
+      GROUP BY articles.article_id`, [article_id])
     .then((article) => {
         if (article.rows.length === 0) {
             return Promise.reject({
@@ -26,3 +34,58 @@ exports.fetchArticlesById = (article_id) => {
         } else return rows[0]
     })
   };
+
+  exports.fetchArticles = (sort_by = "created_at", order = "desc", topic) => {
+
+    const queryValues = []
+
+    const validSorting = ["article_id","title","topic","author","body","created_at","votes","comment_count"]
+    const validOrder = ["asc", "desc"]
+    // const validTopic = checkTopicExists(topic)
+    
+    //["mitch", "cats", "paper"]
+
+    let queryString = `SELECT articles.*,
+    COUNT (comment_id)::INT AS comment_count
+    FROM articles
+    LEFT JOIN comments USING (article_id) 
+    `
+
+    if(!validSorting.includes(sort_by)){
+      return Promise.reject({status: 404, msg: "Bad Request: Invalid input data."})
+    } else if (!validOrder.includes(order)) {
+      return Promise.reject({ status: 404, msg: "Bad Request: Invalid input data." });
+    } 
+
+      if(topic){
+        queryString += `WHERE topic = $1`
+        queryValues.push(topic)
+      } 
+      queryString += `GROUP BY articles.article_id ORDER BY ${sort_by} ${order}`
+
+    return connection
+    .query(queryString, queryValues).then(({rows : articles}) => {
+        if(articles.length === 0){
+          return checkTopicExists(topic).then((result) => {
+            if(!result){
+              return Promise.reject({status: 404, msg: "Bad request: Invalid input topic"})
+            }
+          })
+        }
+        return articles
+      })
+  }
+
+  exports.fetchComments = (article_id) => {
+    return connection
+    .query(
+      `SELECT *
+      FROM comments
+      WHERE comments.article_id = $1 `, [article_id])
+    .then((comment) => { 
+      if (!comment.rows.length) {
+        return checkArticleExists(article_id)
+    }
+    return comment.rows;
+    })
+  }
