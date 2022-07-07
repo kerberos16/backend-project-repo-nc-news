@@ -15,3 +15,18 @@ exports.checkArticleExists = (article_id) => {
         }
     })
 }
+
+exports.checkTopicExists = (topic) => {
+    return connection
+    .query(`
+    SELECT articles.*
+    FROM articles
+    WHERE articles.topic = $1
+    `, [topic]).then((result) => {
+        if(!result.rowCount){
+            return false
+        } else {
+            return true
+        }
+    })
+}

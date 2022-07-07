@@ -3,6 +3,8 @@ const seed = require("../db/seeds/seed.js");
 const testData = require("../db/data/test-data/index.js");
 const app = require("../app");
 const db = require("../db/connection.js");
+const jestSorted = require("jest-sorted");
+
 
 beforeEach(() => {
     return seed(testData);
@@ -293,4 +295,78 @@ describe("app", () => {
     });
   });
 
-})
+  describe.only("11 GET query /api/articles?sort_by=created_at&order=desc", () => {
+    test("status: 200 returns articles sorted by the default criteria of created_at column and descending order", () => {
+      return request(app)
+      .get("/api/articles?sort_by=created_at&order=desc")
+      .expect(200).then(({body}) => {
+        expect(body.articles).toBeSortedBy("created_at", {
+          descending: true
+        })
+      })
+    })
+    test("status: 200 returns articles sorted by the author criteria and ascending order", () => {
+      return request(app)
+      .get("/api/articles?sort_by=author&order=asc")
+      .expect(200).then(({body}) => {
+        expect(body.articles).toBeSortedBy("author", {
+          descending: false
+        })
+      })
+    })
+    test("status: 200 returns with an array of CATS topics only", () => {
+      return request(app)
+      .get("/api/articles?topic=cats")
+      .expect(200).then(({body}) => {
+        expect(body.articles).toHaveLength(1)
+        body.articles.forEach((article) => {
+          expect(article.topic).toEqual("cats")
+        })
+      })
+    })
+    test("status: 200 returns with an array of MITCH topics only, sorted by title in ascending order", () => {
+      return request(app)
+      .get("/api/articles?sort_by=title&order=asc&topic=mitch")
+      .expect(200).then(({body}) => {
+        expect(body.articles).toHaveLength(11)
+        expect(body.articles).toBeSortedBy("title", {
+          descending: false
+        })
+        body.articles.forEach((article) => {
+          expect(article.topic).toEqual("mitch")
+        })
+      })
+    })
+    test("status 404: responds with an error when passed an invalid order", () => {
+      return request(app)
+      .get("/api/articles?order=horizontal")
+      .expect(404).then(({body : {msg}}) =>{
+        expect(msg).toEqual("Bad Request: Invalid input data.")
+      })
+    })
+    test("status 404: responds with an error when passed an invalid sort_by", () => {
+      return request(app)
+      .get("/api/articles?sort_by=publisher")
+      .expect(404).then(({body : {msg}}) =>{
+        expect(msg).toEqual("Bad Request: Invalid input data.")
+      })
+    })
+    test("status 404: responds with an error when passed an invalid topic", () => {
+      return request(app)
+      .get("/api/articles?topic=linguistics")
+      .expect(404).then(({body : {msg}}) =>{
+        expect(msg).toEqual("Bad request: Invalid input topic")
+      })
+    })
+    test("status 404: responds with an error when passed an invalid sort by option", () => {
+      return request(app)
+      .get("/api/articles?sort_by=mood")
+      .expect(404).then(({body : {msg}}) =>{
+        expect(msg).toEqual("Bad Request: Invalid input data.")
+      })
+    })
+    
+  })
+  })
+  
+

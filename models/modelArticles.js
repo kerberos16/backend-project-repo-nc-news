@@ -1,6 +1,6 @@
 const { rows } = require("pg/lib/defaults");
 const connection = require("../db/connection")
-const {checkArticleExists} = require("./checkIfExists")
+const {checkArticleExists, checkTopicExists} = require("./checkIfExists")
 
 exports.fetchArticlesById = (article_id) => {
     return connection
@@ -35,32 +35,43 @@ exports.fetchArticlesById = (article_id) => {
     })
   };
 
-  exports.fetchArticles = (sort_by = "created_at", order = "desc") => {
+  exports.fetchArticles = (sort_by = "created_at", order = "desc", topic) => {
+
+    const queryValues = []
 
     const validSorting = ["article_id","title","topic","author","body","created_at","votes","comment_count"]
     const validOrder = ["asc", "desc"]
+    // const validTopic = checkTopicExists(topic)
+    
+    //["mitch", "cats", "paper"]
 
-    let queryString = `SELECT 
-    articles.article_id, 
-    articles.title, 
-    articles.topic, 
-    articles.author, 
-    articles.created_at, 
-    articles.votes,
+    let queryString = `SELECT articles.*,
     COUNT (comment_id)::INT AS comment_count
     FROM articles
     LEFT JOIN comments USING (article_id) 
-    GROUP BY articles.article_id`
+    `
 
     if(!validSorting.includes(sort_by)){
-      return Promise.reject({status: 400, msg: "Bad Request: Invalid input data."})
+      return Promise.reject({status: 404, msg: "Bad Request: Invalid input data."})
     } else if (!validOrder.includes(order)) {
-      return Promise.reject({ status: 400, msg: "Bad Request: Invalid input data." });
-    } else {
-      queryString += ` ORDER BY ${sort_by} ${order}`}
+      return Promise.reject({ status: 404, msg: "Bad Request: Invalid input data." });
+    } 
+
+      if(topic){
+        queryString += `WHERE topic = $1`
+        queryValues.push(topic)
+      } 
+      queryString += `GROUP BY articles.article_id ORDER BY ${sort_by} ${order}`
 
     return connection
-    .query(queryString).then(({rows : articles}) => {
+    .query(queryString, queryValues).then(({rows : articles}) => {
+        if(articles.length === 0){
+          return checkTopicExists(topic).then((result) => {
+            if(!result){
+              return Promise.reject({status: 404, msg: "Bad request: Invalid input topic"})
+            }
+          })
+        }
         return articles
       })
   }
