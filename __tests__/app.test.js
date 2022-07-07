@@ -4,6 +4,7 @@ const testData = require("../db/data/test-data/index.js");
 const app = require("../app");
 const db = require("../db/connection.js");
 const jestSorted = require("jest-sorted");
+const json = require("../endpoints.json")
 
 
 beforeEach(() => {
@@ -392,13 +393,14 @@ describe("app", () => {
       })
   });
     });
-    describe("13 GET /api", () => {
+    describe.only("13 GET /api", () => {
       test("status: 200, reposnds with a json object of all available endpoints", () => {
         return request(app)
         .get("/api")
         .expect(200)
         .then(({body}) => {
           expect(body.api).toBeInstanceOf(Object)
+          expect(body.api).toEqual(json)
         })
       })
     })
