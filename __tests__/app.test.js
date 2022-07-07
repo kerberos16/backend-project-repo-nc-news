@@ -393,7 +393,7 @@ describe("app", () => {
       })
   });
     });
-    describe.only("13 GET /api", () => {
+    describe("13 GET /api", () => {
       test("status: 200, reposnds with a json object of all available endpoints", () => {
         return request(app)
         .get("/api")
@@ -404,6 +404,153 @@ describe("app", () => {
         })
       })
     })
-  })
-  
+    describe("16. GET /api/users/:username", () => {
+      test("status:200, responds with a user object by username", () => {
+        return request(app)
+        .get("/api/users/icellusedkars")
+        .expect(200)
+        .then(({body}) => {
+          expect(body.user).toMatchObject( {
+            username: 'icellusedkars',
+            name: 'sam',
+            avatar_url: 'https://avatars2.githubusercontent.com/u/24604688?s=460&v=4'
+          },)
+        })
+      })
+      test("status:404 when user requests a username that does not exist", () => {
+        return request(app)
+        .get("/api/users/kerberos92")
+        .expect(404)
+        .then(({ body : {msg} }) => {
+          expect(msg).toEqual("User not found!")
+        })
+      })
+      test("status:400 when user request an article of an invalid type", () => {
+        return request(app)
+        .get("/api/users/3")
+        .expect(404)
+        .then(({ body : {msg} }) => {
+          expect(msg).toEqual("User not found!")
+        })
+      })
+    })
 
+    describe("18. PATCH /api/comments/:comment_id", () => {
+      test("status:200, responds with a comment object with updated votes", () => {
+        return request(app)
+        .patch("/api/comments/1")
+        .send({inc_votes: 4})
+        .expect(200)
+        .then(({body}) => {
+          const updatedComment = body.comment
+          expect(updatedComment).toMatchObject({
+            body: "Oh, I've got compassion running out of my nose, pal! I'm the Sultan of Sentiment!",
+            votes: 20,
+            author:"butter_bridge",
+            article_id: 9,
+            created_at: expect.any(String)
+          })
+        })
+      })
+      test('status:400, comment_id is an invalid type', () => {
+        return request(app)
+          .patch('/api/comment/thisisnotacomment')
+          .send({ inc_votes: -1 })
+          .expect(404)
+          .then(({body : {msg}}) => {
+            expect(msg).toEqual('Invalid Path')
+          })
+      })
+      test('status:404, comment_id does not exist', () => {
+        return request(app)
+          .patch('/api/comments/999999')
+          .send({ inc_votes: 5 })
+          .expect(404)
+          .then(({body : {msg}}) => {
+            expect(msg).toEqual('Bad Request: Invalid input data')
+          })
+      })
+      test('status:400, invalid value for votes', () => {
+        return request(app)
+          .patch('/api/comments/1')
+          .send({ inc_votes: 'thisisnotacceptable' })
+          .expect(400)
+          .then(({body : {msg}}) => {
+            expect(msg).toEqual('Bad Request!')
+          })
+    })
+      test('status:400, no input to add', () => {
+        return request(app)
+        .patch('/api/comments/3')
+        .send({})
+        .expect(400)
+        .then(({body : {msg}}) => {
+          expect(msg).toEqual('Bad request: Missing input.')
+        })
+    })
+
+  });
+
+  describe("19 POST /api/articles", () => {
+    test("status: 201 - responds with an object of the posted article. Author/username and topic are foreign key constraints, so their values cannot be new", () => {
+      return request(app)
+        .post("/api/articles")
+        .send({
+          title: "How to Tell If Your Cat Is Plotting to Kill You",
+          topic: "cats",
+          username: "rogersop",
+          body: "The book will be designed to create suspense/anticipation with page turns analogous to the experience of scrolling down through the panels on the website. For example, Cat vs. Internet will use page turns to draw out the reader's anticipation of what the crafty kitty might do next to get attention from his Internet-fixated owner."
+        })
+        .expect(201)
+        .then(({ body }) => {
+          expect(body.article).toMatchObject({
+            article_id: expect.any(Number),
+            title: "How to Tell If Your Cat Is Plotting to Kill You",
+            topic: "cats",
+            author: "rogersop",
+            body: "The book will be designed to create suspense/anticipation with page turns analogous to the experience of scrolling down through the panels on the website. For example, Cat vs. Internet will use page turns to draw out the reader's anticipation of what the crafty kitty might do next to get attention from his Internet-fixated owner.",
+            votes: 0,
+            created_at: expect.any(String)
+        });
+        });
+    });
+    test("status: 400 - responds with an error due to an invalid/empty body", () => {
+      return request(app)
+      .post("/api/articles")
+      .send({})
+      .expect(400)
+      .then(({ body : {msg}}) => {
+        expect(msg).toEqual("Bad Request: Invalid input data");
+      });
+    })
+    test("status: 404 - responds with an error if user does not exist", () => {
+      return request(app)
+      .post("/api/articles")
+      .send({
+        title: "How to Tell If Your Cat Is Plotting to Kill You",
+        topic: "cats",
+        username: "someonewhoisnotinthedatabase",
+        body: "This body is a filler just for this test and does not represent the amazing content of the book title"
+      })
+      .expect(404)
+      .then(({ body : {msg} }) => {
+        expect(msg).toEqual("Path not found!");
+      });
+    })
+    test("status: 404 - responds with an error if topic does not exist", () => {
+      return request(app)
+      .post("/api/articles")
+      .send({
+        title: "How to Tell If Your Cat Is Plotting to Kill You",
+        topic: "dogs",
+        username: "rogersop",
+        body: "This body is a filler just for this test and does not represent the amazing content of the book title"
+      })
+      .expect(404)
+      .then(({ body : {msg} }) => {
+        expect(msg).toEqual("Path not found!");
+      });
+    })
+  })
+
+})

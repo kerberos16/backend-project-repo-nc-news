@@ -25,7 +25,7 @@ exports.fetchArticlesById = (article_id) => {
     if (!inc_votes)
       return Promise.reject({ status: 400, msg: "Bad request: Missing input." });
     return connection
-    .query('UPDATE articles SET votes = $1 WHERE article_id =$2 RETURNING*', [inc_votes,article_id]).then(({rows}) => {
+    .query('UPDATE articles SET votes = votes + $1 WHERE article_id =$2 RETURNING*', [inc_votes,article_id]).then(({rows}) => {
         if(rows.length === 0) {
           return Promise.reject({
             status:404,
@@ -41,9 +41,6 @@ exports.fetchArticlesById = (article_id) => {
 
     const validSorting = ["article_id","title","topic","author","body","created_at","votes","comment_count"]
     const validOrder = ["asc", "desc"]
-    // const validTopic = checkTopicExists(topic)
-    
-    //["mitch", "cats", "paper"]
 
     let queryString = `SELECT articles.*,
     COUNT (comment_id)::INT AS comment_count
@@ -89,3 +86,33 @@ exports.fetchArticlesById = (article_id) => {
     return comment.rows;
     })
   }
+
+  exports.addArticle = (newArticle) => {
+    if (
+      typeof newArticle.title !== "string" ||
+      typeof newArticle.topic !== "string" ||
+      typeof newArticle.username !== "string" ||
+      typeof newArticle.body !== "string"
+    ) {
+      return Promise.reject({
+        status: 400,
+        msg: "Bad Request: Invalid input data"
+      });
+  }
+
+  newArticle.author = newArticle.username
+  delete newArticle.username
+
+  return connection
+  .query(`
+  INSERT INTO articles (title, topic, author, body)
+  VALUES ($1, $2, $3, $4)
+  RETURNING *;
+  `, 
+  [newArticle.title, newArticle.topic, newArticle.author, newArticle.body]
+  )
+  .then(({rows}) => {
+    return rows[0]
+
+  })
+}

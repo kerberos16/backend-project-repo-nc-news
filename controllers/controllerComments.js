@@ -1,5 +1,6 @@
+const { restart } = require('nodemon');
 const { user } = require('pg/lib/defaults');
-const {insertComment, removeComment} = require('../models/modelComments')
+const {insertComment, removeComment, updateComment} = require('../models/modelComments')
 
 exports.postComment = (req, res, next) => {
     const {article_id} = req.params;
@@ -34,5 +35,16 @@ exports.deleteComment = (req,res, next) => {
         next(err)
     })
   };
+
+
+exports.patchComment = (req, res, next) => {
+    const {comment_id} = req.params
+    const {inc_votes} = req.body
+    updateComment(comment_id, inc_votes).then((comment) => {
+        res.status(200).send({comment})
+    }).catch((err) => {
+        next(err)
+    })
+}
 
 
