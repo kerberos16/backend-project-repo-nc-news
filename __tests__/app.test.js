@@ -392,6 +392,16 @@ describe("app", () => {
       })
   });
     });
+    describe("13 GET /api", () => {
+      test("status: 200, reposnds with a json object of all available endpoints", () => {
+        return request(app)
+        .get("/api")
+        .expect(200)
+        .then(({body}) => {
+          expect(body.api).toBeInstanceOf(Object)
+        })
+      })
+    })
   })
   
 
