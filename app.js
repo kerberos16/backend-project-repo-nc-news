@@ -4,8 +4,11 @@ const { getTopics } = require("./controllers/controllerTopic.js")
 const { getArticlesById, patchArticle, getArticles, getComments} = require("./controllers/controllerArticles.js")
 const { getUsers } = require("./controllers/controllerUsers")
 const { postComment, deleteComment } = require("./controllers/controllerComments")
+const { getAll } = require("./controllers/controllerAPI.js")
 
-const {handlePSQLErrors, handleCustomErrors, handleServerErrors} = require("./errors/errorHandlers")
+
+const {handlePSQLErrors, handleCustomErrors, handleServerErrors, handle405s} = require("./errors/errorHandlers")
+const { restart } = require("nodemon")
 
 const app = express();
 app.use(express.json())
@@ -18,6 +21,7 @@ app.get('/api/articles' , getArticles)
 app.get('/api/articles/:article_id/comments', getComments)
 app.post('/api/articles/:article_id/comments', postComment)
 app.delete('/api/comments/:comment_id', deleteComment)
+app.get('/api', getAll)
 
 
 
