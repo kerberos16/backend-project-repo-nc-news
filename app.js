@@ -3,7 +3,7 @@ const express = require("express")
 const { getTopics } = require("./controllers/controllerTopic.js")
 const { getArticlesById, patchArticle, getArticles, getComments} = require("./controllers/controllerArticles.js")
 const { getUsers } = require("./controllers/controllerUsers")
-const { postComment } = require("./controllers/controllerComments")
+const { postComment, deleteComment } = require("./controllers/controllerComments")
 
 const {handlePSQLErrors, handleCustomErrors, handleServerErrors} = require("./errors/errorHandlers")
 
@@ -17,6 +17,8 @@ app.get('/api/users', getUsers)
 app.get('/api/articles' , getArticles)
 app.get('/api/articles/:article_id/comments', getComments)
 app.post('/api/articles/:article_id/comments', postComment)
+app.delete('/api/comments/:comment_id', deleteComment)
+
 
 
 app.all("/*", (req,res,next) => {

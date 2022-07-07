@@ -1,5 +1,5 @@
 const { user } = require('pg/lib/defaults');
-const {insertComment} = require('../models/modelComments')
+const {insertComment, removeComment} = require('../models/modelComments')
 
 exports.postComment = (req, res, next) => {
     const {article_id} = req.params;
@@ -24,4 +24,15 @@ exports.postComment = (req, res, next) => {
     }
 
 }
+
+
+exports.deleteComment = (req,res, next) => {
+    const { comment_id } = req.params;
+    removeComment(comment_id).then(() => {
+    res.status(204).send('Comment deleted!')})
+    .catch((err) => {
+        next(err)
+    })
+  };
+
 

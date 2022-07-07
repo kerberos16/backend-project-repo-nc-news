@@ -295,7 +295,7 @@ describe("app", () => {
     });
   });
 
-  describe.only("11 GET query /api/articles?sort_by=created_at&order=desc", () => {
+  describe("11 GET query /api/articles?sort_by=created_at&order=desc", () => {
     test("status: 200 returns articles sorted by the default criteria of created_at column and descending order", () => {
       return request(app)
       .get("/api/articles?sort_by=created_at&order=desc")
@@ -365,8 +365,33 @@ describe("app", () => {
         expect(msg).toEqual("Bad Request: Invalid input data.")
       })
     })
-    
-  })
+    })
+    describe("12 DELETE /api/comments/:comment_id", () => {
+      test("status 204: deletes a comment", () => {
+        return request(app)
+          .delete("/api/comments/1")
+          .expect(204)
+          .then(({body }) => {
+            expect(body).toEqual({});
+          });
+      });
+      test('status 404: responds with an error if endpoint is invalid', () => {
+        return request(app)
+        .delete('/api/comments/thisisnotavalidcomment')
+        .expect(400)
+        .then(({body : {msg}})=> {
+            expect(msg).toEqual('Bad Request!')
+        })
+    });
+    test('status 404: returns an error if comment_id does not exist', () => {
+      return request(app)
+      .delete('/api/comments/239')
+      .expect(404)
+      .then(({body : {msg}})=> {
+          expect(msg).toEqual('Page not found: Comment does not exist')
+      })
+  });
+    });
   })
   
 
