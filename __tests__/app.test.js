@@ -581,7 +581,7 @@ describe("app", () => {
         });
     });
   });
-  describe("23 DELETE /api/articles/:article_id", () => {
+  describe("23 DELETE /api/articles/:article_id - does not work with article_ids that have comments due to foreign key contraints", () => {
     test.only("status 204: deletes an article", () => {
       return request(app)
         .delete("/api/articles/2")
