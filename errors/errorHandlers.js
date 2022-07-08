@@ -1,5 +1,5 @@
 exports.handle405s = (req, res, next) => {
-  res.status(405).send({ msg: "Method not allowed on that endpoint!" });
+  res.status(405).send({ msg: "Method Not Allowed" });
 };
 
 exports.handleCustomErrors = (err, req, res, next) => {

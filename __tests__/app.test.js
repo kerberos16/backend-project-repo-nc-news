@@ -38,9 +38,9 @@ describe("app", () => {
           test("404: Should respond with correct error message for invalid path", () => {
             return request(app)
               .get("/api/topicZ")
-              .expect(404)
+              .expect(405)
               .then(({ body : {msg} }) => {
-               expect(msg).toEqual("Invalid Path");
+               expect(msg).toEqual("Method Not Allowed");
               });
           });
     })
@@ -235,9 +235,9 @@ describe("app", () => {
     test("status:404, responds with correct error message for invalid path", () => {
       return request(app)
         .get("/api/articles/1/NOTcomments")
-        .expect(404)
+        .expect(405)
         .then(({ body : {msg} }) => {
-         expect(msg).toEqual("Invalid Path");
+         expect(msg).toEqual("Method Not Allowed");
         });
   });
      test("status: 200, responds with an emptry array if article exists, but without any comments", () => {
@@ -456,9 +456,9 @@ describe("app", () => {
         return request(app)
           .patch('/api/comment/thisisnotacomment')
           .send({ inc_votes: -1 })
-          .expect(404)
+          .expect(405)
           .then(({body : {msg}}) => {
-            expect(msg).toEqual('Invalid Path')
+            expect(msg).toEqual('Method Not Allowed')
           })
       })
       test('status:404, comment_id does not exist', () => {
@@ -552,5 +552,59 @@ describe("app", () => {
       });
     })
   })
-
+  describe("22 POST /api/topics", () => {
+    test("status: 201 responds with a newly posted topic", () => {
+      return request(app)
+        .post("/api/topics")
+        .send( {
+          description: 'Javascript for Dummies',
+          slug: 'the_book!'
+        })
+        .expect(201)
+        .then(({body}) => {
+          expect(body.topic).toMatchObject({
+            slug: "the_book!",
+            description: "Javascript for Dummies",
+          });
+        });
+    });
+    test("status: 400 responds with an error if the input is not in the correct format", () => {
+      return request(app)
+        .post("/api/topics")
+        .send({
+          description: 'Javascript for Dummies',
+          pubslishing_date: '2000-02-08'
+        })
+        .expect(400)
+        .then(({body : {msg}}) => {
+          expect(msg).toEqual("Bad request: Invalid input parameters");
+        });
+    });
+  });
+  describe("23 DELETE /api/articles/:article_id", () => {
+    test.only("status 204: deletes an article", () => {
+      return request(app)
+        .delete("/api/articles/2")
+        .expect(204)
+        .then(({body}) => {
+          expect(body).toEqual({});
+        });
+    });
+    test('status 404: responds with an error if endpoint is invalid', () => {
+      return request(app)
+      .delete('/api/articles/thisisnotavalidarticle')
+      .expect(400)
+      .then(({body : {msg}})=> {
+          expect(msg).toEqual('Bad Request!')
+      })
+  });
+  test('status 404: returns an error if article_id does not exist', () => {
+    return request(app)
+    .delete('/api/articles/239')
+    .expect(404)
+    .then(({body : {msg}})=> {
+        expect(msg).toEqual('Page not found: Article does not exist')
+    })
+});
+  });
 })

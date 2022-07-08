@@ -7,3 +7,14 @@ exports.fetchTopics = () => {
     })
 }
 
+exports.addTopic = (newTopic) => {
+    return connection
+    .query(`
+    INSERT INTO topics (description, slug) 
+    VALUES ($1, $2)
+    RETURNING*;
+    `, [newTopic.description, newTopic.slug])
+    .then(({rows}) => {
+        return rows[0]
+    })
+}

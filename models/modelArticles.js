@@ -116,3 +116,18 @@ exports.fetchArticlesById = (article_id) => {
 
   })
 }
+
+exports.removeArticle = (article_id) => {
+  return connection
+  .query(`
+  DELETE FROM articles
+  WHERE article_id = $1;`, [article_id])
+  .then((rows) => {
+    if(rows.rowCount === 0) {
+      return Promise.reject({
+        status:404,
+        msg: "Page not found: Article does not exist"
+      })
+    } else return rows
+  })
+}
