@@ -162,13 +162,12 @@ This query will retrieve articles that can be filtered by the article topic. The
     "votes": 3,
     "created_at": "2017-08-31T12:51:40.263Z",
     "author": "grumpy19",
-    "body": "Qui sunt sit voluptas repellendus sed. Voluptatem et repellat fugiat.
+    "body": "Qui sunt sit voluptas repellendus sed. Voluptatem et repellat fugiat."
   }
 }
 
 ```
 **PATCH** `/api/comments/:comment_id
-```json
 ```json
 {
 "inc_votes": "newVote"
