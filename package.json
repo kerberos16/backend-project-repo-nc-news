@@ -4,7 +4,7 @@
   "description": "bc-nc-news",
   "main": "index.js",
   "scripts": {
-    "start" : "node listen.js",
+    "start": "node listen.js",
     "setup-dbs": "psql -f ./db/setup.sql",
     "seed": "node ./db/seeds/run-seed.js",
     "test": "jest",
@@ -30,6 +30,7 @@
     "pg-format": "^1.0.4"
   },
   "dependencies": {
+    "cors": "^2.8.5",
     "dotenv": "^16.0.1",
     "express": "^4.18.1",
     "nodemon": "^2.0.18",
