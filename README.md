@@ -155,6 +155,7 @@ This query will retrieve articles that can be filtered by the article topic. The
 ```
 **POST** `/api/articles/:article_id/comments
 ```json
+
 {
    "comment": {
     "comment_id": 3,
@@ -164,6 +165,7 @@ This query will retrieve articles that can be filtered by the article topic. The
     "body": "Qui sunt sit voluptas repellendus sed. Voluptatem et repellat fugiat.
   }
 }
+
 ```
 **PATCH** `/api/comments/:comment_id
 ```json
