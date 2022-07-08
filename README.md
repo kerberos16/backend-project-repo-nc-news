@@ -8,7 +8,7 @@ The hosted version of the application can be found [here](https://sizens-nc-news
 
 ## Getting Started
 
-1. Please clone this repository from *insert url at a later point*
+1. Please clone this repository from [here](https://github.com/kerberos16/backend-project-repo-nc-news)
 
 2. cd into the repository
 cd backend-project-repo-nc-news
